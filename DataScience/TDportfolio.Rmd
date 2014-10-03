@@ -1,0 +1,110 @@
+---
+title: "Data science portfolio"
+author: "Trevor D Rhone"
+date: "10/03/2014"
+output: html_document
+---
+--------------------------------------------------------------------------------------------------------------------------
+
+## Data Analytics of Weight Lifting Exercises
+### Using machine learning to predict qualitative features of physical activity
+
+The manner in which six subjects performed weight lifting exercises were quantified by attaching accelerometers, speedometers and position sensors to parts of their body during the activity.
+The goal is to predict the manner in which the exercise was performed.
+There is a "classe" variable in the training set which parameterizes the 'outcome' of the exercise. Where the outcome in this case quantifies how the exercise was performed.
+[you might want to expand on wha the classe signifies explicitly]
+The features or variables represent the data from our accelerometers etc. We will perform the prediction with these features.
+---
+OTHER from hw assignment :
+describing how you built your model, how you used cross validation,
+what you think the expected out of sample error is,
+why you made the choices you did.
+You will also use your prediction model to predict 20 different test cases.
+---
+
+Begin by importing machine learning related libraries used in this analysis:
+```{r,eval=TRUE,echo=FALSE}
+library(caret)
+library(randomForest)
+library(lattice)
+library(ggplot2)
+set.seed(334)
+```
+
+An important first step in the data analysis process is the get an intuitive feel for how the data should be handled by visually inspecting the data set. In these case of the csv file comprising the data used in this analysis, the file may be browsed using a spreadsheet processor such as Microsoft EXCEL. We will find a few important things:
+
+* The data contain many missing values or 'NA's
+* Columns assigning a sequence number to the data MUST be removed to avoid spurious correlations
+* Columns which carry no meaningful information, e.g. the 'timestamp' column in the case where a timeseries analysis is ignored for simplicity.
+
+Import dataset:
+```{r}
+rawdata <- read.table("~/Desktop/Documents/Practical Machine Learning/project/pml-training.csv",sep=",", header = TRUE, na.strings=c("",NA))
+```
+Note: The na.strings argument is important for importing the dataset in such a way that allows calculations to be easily
+      performed on the data table.
+
+Remove the first few 'useless' columns of the dataframe
+```{r}
+data <- rawdata[,c(-1,-2,-3,-4,-5,-7)]
+```
+
+Remove 'sparse columns' that appear to summarize statistics within the 'window' column where 'window'= yes
+```{r}
+windowindex <- data[,"new_window"]=="no"
+subdata <- data[windowindex,]
+naindex <- sapply(subdata,function(x) any(is.na(x)))
+newdata <- subdata[,!naindex]
+```
+
+Visualization is an important step in data analysis. Let us use 'featurePlot' to explore potential correlations between a few randomly chosen features,
+```{r}
+newdata <- newdata[,-1] #remove new_window columna
+testdata <- newdata[,1:5]
+#featurePlot(x=testdata, y=data$classe, plot="pairs")
+```
+here we show how some features "roll_belt", "pitch_belt", etc. vary with eachother in a pairwise fashion. The entire list of features used is shown here:
+```{r}
+names(newdata[,1:5])
+```
+
+Partition our data set into a training set (70%) and a crossvalidation set (30%):
+```{r}
+inTrain <- createDataPartition(y=newdata$classe, p=0.7, list = FALSE)
+training <- newdata[inTrain,]
+crossval <- newdata[-inTrain,]
+```
+
+We use the random Forest algorithm to build our model based on the "classe" outcome. We the caret package has a version of the random forest algorithm which is slow and is not executed in the following code snippet.  Instead, we will use the much faster randomForest() function.
+```{r}
+# model  <- train(training$classe ~., data=training, method = "rf" )
+model <- randomForest(classe ~., training, ntree=100)
+```
+
+Now that we have built the model using our training data, we can make a prediction using the features in the crossvalidation data set.  These data are not seen by the algorithm during training and provides a better estimate of the success or accuracy of our model.
+```{r}
+prediction <- predict(model, crossval)
+```
+
+The 'prediction' variable contains the model predictions using the crossvalidation data set. We can compare the predictions to the actual values recorded to test the accuracy of our model. The following code does this:
+```{r}
+confusionMatrix(prediction,crossval$classe)
+```
+We have a high accuracy of 99.7% ! Other relavant comparative statistics are also shown, such as the sensitivity and the specificity.
+
+
+We may want to know what feature is the leading predictor in our model.  We can examine this with the following function which displays the most important variables with respect to the Mean Decrease Gini index. The greater the index, the greater the importance of the variable.
+```{r}
+varImpPlot(model)
+```
+
+
+
+-------------------------------------------------------------------------------------------------------
+The data used in this sample maybe be found at:
+http://groupware.les.inf.puc-rio.br/har
+and was inspired by Ref. [1]
+
+[1] Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H. Qualitative Activity Recognition of Weight Lifting Exercises. Proceedings of 4th International Conference in Cooperation with SIGCHI (Augmented Human '13) . Stuttgart, Germany: ACM SIGCHI, 2013.
+
+
