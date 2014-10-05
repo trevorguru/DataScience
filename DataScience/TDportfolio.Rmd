@@ -105,6 +105,7 @@ varImpPlot(model)
 
 ![Image of varImpPlot](https://github.com/trevorguru/DataScience/blob/master/DataScience/varImpPlot.jpeg)
 
+![Html output](https://github.com/trevorguru/DataScience/blob/master/DataScience/TDportfolio.html)
 
 -------------------------------------------------------------------------------------------------------
 The data used in this sample maybe be found at:
