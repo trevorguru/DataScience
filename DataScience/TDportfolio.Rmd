@@ -39,7 +39,7 @@ An important first step in the data analysis process is the get an intuitive fee
 
 Import dataset:
 ```{r}
-rawdata <- read.table("~/Desktop/Documents/Practical Machine Learning/project/pml-training.csv",sep=",", header = TRUE, na.strings=c("",NA))
+rawdata <- read.table("~/Desktop/DataScience/pml-training.csv",sep=",", header = TRUE, na.strings=c("",NA))
 ```
 Note: The na.strings argument is important for importing the dataset in such a way that allows calculations to be easily
       performed on the data table.
@@ -61,7 +61,7 @@ Visualization is an important step in data analysis. Let us use 'featurePlot' to
 ```{r}
 newdata <- newdata[,-1] #remove new_window columna
 testdata <- newdata[,1:5]
-#featurePlot(x=testdata, y=data$classe, plot="pairs")
+featurePlot(x=testdata, y=data$classe, plot="pairs")
 ```
 here we show how some features "roll_belt", "pitch_belt", etc. vary with eachother in a pairwise fashion. The entire list of features used is shown here:
 ```{r}
