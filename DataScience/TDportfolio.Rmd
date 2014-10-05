@@ -60,12 +60,16 @@ newdata <- subdata[,!naindex]
 Visualization is an important step in data analysis. Let us use 'featurePlot' to explore potential correlations between a few randomly chosen features,
 ```{r}
 newdata <- newdata[,-1] #remove new_window columna
-testdata <- newdata[,1:5]
+testdata <- newdata[,c("pitch_belt","yaw_belt","magnet_forearm_x","pitch_forearm")]
+# jpeg("featurePlot.jpg")  # I have uploaded the image output to Github
 featurePlot(x=testdata, y=data$classe, plot="pairs")
+# dev.off()
 ```
+![Image of featurePlot](https://github.com/trevorguru/DataScience/blob/master/DataScience/featurePlot.jpg)
+
 here we show how some features "roll_belt", "pitch_belt", etc. vary with eachother in a pairwise fashion. The entire list of features used is shown here:
 ```{r}
-names(newdata[,1:5])
+names(newdata[,c("pitch_belt","yaw_belt","pitch_dumbbell","pitch_forearm")])
 ```
 
 Partition our data set into a training set (70%) and a crossvalidation set (30%):
@@ -92,12 +96,14 @@ confusionMatrix(prediction,crossval$classe)
 ```
 We have a high accuracy of 99.7% ! Other relavant comparative statistics are also shown, such as the sensitivity and the specificity.
 
-
 We may want to know what feature is the leading predictor in our model.  We can examine this with the following function which displays the most important variables with respect to the Mean Decrease Gini index. The greater the index, the greater the importance of the variable.
 ```{r}
+#jpeg("varImpPlot.jpeg") # uploaded image output to Github
 varImpPlot(model)
+#dev.off()
 ```
 
+![Image of varImpPlot](https://github.com/trevorguru/DataScience/blob/master/DataScience/varImpPlot.jpeg)
 
 
 -------------------------------------------------------------------------------------------------------
